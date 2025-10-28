@@ -54,16 +54,19 @@ class KindleSSH
     int counter = 0;
     foreach (ISftpFile file in client.ListDirectory("/mnt/us/....")) // path to the files on target machine.
     {
-      // computing the SHA256 hash in order to make sure no duplicates exist or files is not overwitten.
-      SHA256 sha = SHA256.Create();
-      string fname = Path.GetFileName(file.FullName);
-      SftpFileStream sfs = client.OpenRead(file.FullName);
-      byte[] hash = sha.ComputeHash(sfs);
-      string hashcode = Convert.ToHexStringLower(hash);
-      presentFiles.Add(hashcode); // adds files to the HashSet in order to use it later to check and prevent duplicate files or overwriting the files.
-      Console.WriteLine($"Found Files {fname}");
-      sfs.Close();
-      counter++;
+      if (file.IsRegularFile) // check to see if the file is a file indeed (lol).
+      {
+        // computing the SHA256 hash in order to make sure no duplicates exist or files is not overwitten.
+        SHA256 sha = SHA256.Create();
+        string fname = Path.GetFileName(file.FullName);
+        SftpFileStream sfs = client.OpenRead(file.FullName);
+        byte[] hash = sha.ComputeHash(sfs);
+        string hashcode = Convert.ToHexStringLower(hash);
+        presentFiles.Add(hashcode); // adds files to the HashSet in order to use it later to check and prevent duplicate files or overwriting the files.
+        Console.WriteLine($"Found Files {fname}");
+        sfs.Close();
+        counter++;
+      }
     }
     Console.WriteLine($"Total files found {counter}");
     counter = 0;
